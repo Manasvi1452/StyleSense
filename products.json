@@ -1,0 +1,26 @@
+[
+  {
+    "category": "formal shirt",
+    "name": "White Slim Fit Formal Shirt",
+    "brand": "H&M",
+    "price": "₹1499",
+    "image": "shirt.jpg",
+    "link": "https://www.myntra.com/"
+  },
+  {
+    "category": "blazer",
+    "name": "Black Structured Blazer",
+    "brand": "Zara",
+    "price": "₹4999",
+    "image": "blazer.jpg",
+    "link": "https://www.zara.com/in/"
+  },
+  {
+    "category": "heels",
+    "name": "Nude Block Heels",
+    "brand": "Aldo",
+    "price": "₹2999",
+    "image": "heels.jpg",
+    "link": "https://www.amazon.in/"
+  }
+]
