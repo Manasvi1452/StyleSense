@@ -10,6 +10,8 @@ from ai_engine import generate_recommendation
 from shopping_service import match_products
 
 import os
+import re
+from urllib.parse import quote_plus
 
 load_dotenv()
 
@@ -43,6 +45,72 @@ def get_budget_limit(budget):
         return 6000
     else:
         return 20000
+
+
+def fallback_queries(style_mode, gender, occasion):
+    g = (gender or "").strip().lower()
+    o = (occasion or "").strip().lower()
+
+    if style_mode == "Ethnic":
+        if o == "wedding":
+            clothing = "designer lehenga" if g == "female" else "sherwani set"
+        else:
+            clothing = "kurta set" if g == "female" else "kurta pajama set"
+
+        footwear = "ethnic jutti" if g == "female" else "mojari shoes"
+        jewellery = "jhumka earrings" if g == "female" else "analog watch"
+    else:
+        if o == "office":
+            clothing = "formal blazer with trousers"
+        elif o == "party":
+            clothing = "party dress" if g == "female" else "casual blazer"
+        else:
+            clothing = "smart casual outfit"
+
+        footwear = "heels" if g == "female" else "sneakers"
+        jewellery = "minimal jewellery" if g == "female" else "watch"
+
+    return {
+        "CLOTHING": clothing,
+        "FOOTWEAR": footwear,
+        "JEWELLERY": jewellery
+    }
+
+
+def fill_missing_products(products, queries, budget_limit, gender):
+    gender_term = "women" if (gender or "").strip().lower() == "female" else "men"
+    image_by_category = {
+        "CLOTHING": "/static/product_images/shirt.webp",
+        "FOOTWEAR": "/static/product_images/heels.webp",
+        "JEWELLERY": "/static/product_images/blazer.jpg.webp",
+    }
+
+    suggestions_by_category = {
+        "CLOTHING": ["Kurta Set", "Co-ord Set", "Printed Shirt"],
+        "FOOTWEAR": ["Classic Sneakers", "Ethnic Juttis", "Block Heels"],
+        "JEWELLERY": ["Minimal Earrings", "Statement Necklace", "Bracelet Set"],
+    }
+
+    for category in ["CLOTHING", "FOOTWEAR", "JEWELLERY"]:
+        if products.get(category):
+            continue
+
+        query = (queries.get(category) or category.title()).strip()
+        suggestions = []
+        for item_name in suggestions_by_category[category]:
+            search = f"{query} {item_name} {gender_term} under {budget_limit} INR"
+            link = "https://www.google.com/search?tbm=shop&q=" + quote_plus(search)
+            suggestions.append({
+                "name": item_name,
+                "brand": "StyleSense Pick",
+                "price": f"Under INR {budget_limit}",
+                "image": image_by_category[category],
+                "link": link,
+            })
+
+        products[category] = suggestions
+
+    return products
 
 
 # ----------------- ROUTES -----------------
@@ -140,6 +208,8 @@ def analyze():
     # Detect Skin Tone
     # -------------------------
     result = detect_skin_tone(upload_path)
+    if isinstance(result, str):
+        result = {"tone": "Unknown", "rgb": (0, 0, 0), "note": result}
     skin_tone = result["tone"]
 
     budget_limit = get_budget_limit(budget)
@@ -149,20 +219,34 @@ def analyze():
     # -------------------------
     def parse_recommendation(recommendation):
 
-        styling_text = recommendation
+        styling_text = (recommendation or "").strip()
         structured_queries = {}
 
-        if "SHOPPING_KEYWORDS" not in recommendation:
+        if not recommendation:
             return styling_text, structured_queries
 
-        parts = recommendation.split("SHOPPING_KEYWORDS")
-        styling_text = parts[0].strip()
-        shopping_section = parts[1]
+        marker = re.search(r"shopping[\s_-]*keywords\s*:?", recommendation, flags=re.IGNORECASE)
+        if not marker:
+            return styling_text, structured_queries
+
+        styling_text = recommendation[:marker.start()].strip() or styling_text
+        shopping_section = recommendation[marker.end():]
 
         lines = shopping_section.split("\n")
+        category_map = {
+            "CLOTHING": "CLOTHING",
+            "CLOTHES": "CLOTHING",
+            "OUTFIT": "CLOTHING",
+            "FOOTWEAR": "FOOTWEAR",
+            "SHOES": "FOOTWEAR",
+            "JEWELLERY": "JEWELLERY",
+            "JEWELRY": "JEWELLERY",
+            "ACCESSORY": "ACCESSORY",
+            "ACCESSORIES": "ACCESSORY",
+        }
 
         for line in lines:
-            line = line.strip()
+            line = line.strip().lstrip("-*").strip()
             if not line:
                 continue
 
@@ -173,8 +257,9 @@ def analyze():
             else:
                 continue
 
-            category = category.strip().upper()
-            value = value.strip()
+            raw_category = category.strip().upper().replace(" ", "").replace("_", "")
+            value = value.strip().strip('"').strip("'")
+            category = category_map.get(raw_category, category_map.get(raw_category.rstrip("S"), ""))
 
             if category and value:
                 structured_queries[category] = value
@@ -196,8 +281,12 @@ def analyze():
 
     recommendation_ethnic = generate_recommendation(prompt_ethnic)
     styling_ethnic, queries_ethnic = parse_recommendation(recommendation_ethnic)
+    defaults_ethnic = fallback_queries("Ethnic", gender, occasion)
+    for key, default_value in defaults_ethnic.items():
+        queries_ethnic.setdefault(key, default_value)
 
     products_ethnic = match_products(queries_ethnic, budget_limit, gender)
+    products_ethnic = fill_missing_products(products_ethnic, queries_ethnic, budget_limit, gender)
 
     # -------------------------
     # Generate Western
@@ -214,8 +303,12 @@ def analyze():
 
     recommendation_western = generate_recommendation(prompt_western)
     styling_western, queries_western = parse_recommendation(recommendation_western)
+    defaults_western = fallback_queries("Western", gender, occasion)
+    for key, default_value in defaults_western.items():
+        queries_western.setdefault(key, default_value)
 
     products_western = match_products(queries_western, budget_limit, gender)
+    products_western = fill_missing_products(products_western, queries_western, budget_limit, gender)
 
     # -------------------------
     # Render Results

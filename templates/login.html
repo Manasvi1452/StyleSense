@@ -2,20 +2,73 @@
 <html>
 <head>
     <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<div class="fashion-bg" aria-hidden="true">
+    <span class="float-item item-1"></span>
+    <span class="float-item item-2"></span>
+    <span class="float-item item-3"></span>
+    <span class="float-item item-4"></span>
+    <span class="float-item item-5"></span>
+</div>
 
-<div class="site-title">💜 StyleSense+</div>
+<div class="site-title">StyleSense+</div>
+<p class="site-tagline">Where your style meets smart fashion picks.</p>
 
-<div class="card">
+<div class="clothesline-wrap" aria-hidden="true">
+    <div class="clothesline-wire"></div>
+    <div class="clothesline-track">
+        <div class="garment dress"><span class="cloth"></span></div>
+        <div class="garment shirt"><span class="cloth"></span></div>
+        <div class="garment skirt"><span class="cloth"></span></div>
+        <div class="garment tee"><span class="cloth"></span></div>
+        <div class="garment coat"><span class="cloth"></span></div>
+        <div class="garment shirt"><span class="cloth"></span></div>
+        <div class="garment dress"><span class="cloth"></span></div>
+        <div class="garment shirt"><span class="cloth"></span></div>
+        <div class="garment skirt"><span class="cloth"></span></div>
+        <div class="garment tee"><span class="cloth"></span></div>
+        <div class="garment coat"><span class="cloth"></span></div>
+        <div class="garment shirt"><span class="cloth"></span></div>
+    </div>
+</div>
 
-    <h2>Login</h2>
-    <form method="POST">
-        <input type="email" name="email" placeholder="Email" required><br><br>
-        <input type="password" name="password" placeholder="Password" required><br><br>
-        <button type="submit">Login</button>
-    </form>
-    <a href="/register">Create Account</a>
+<div class="login-shell">
+    <section class="card login-intro">
+        <h2>Your Personal Stylist</h2>
+        <p class="login-intro-text">
+            Sign in to generate outfit ideas, view product matches, and build your mood-based look in seconds.
+        </p>
+        <div class="login-points">
+            <div class="pill">Skin-tone aware styling</div>
+            <div class="pill">Ethnic + Western looks</div>
+            <div class="pill">Budget-friendly shopping links</div>
+        </div>
+    </section>
+
+    <div class="card login-card">
+        <h2>Welcome Back</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash-msg">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" placeholder="you@example.com" required>
+
+            <label for="password">Password</label>
+            <input id="password" type="password" name="password" placeholder="Enter password" required>
+
+            <button class="full-btn" type="submit">Login</button>
+        </form>
+        <p class="top-gap row-center"><a href="/register">Create Account</a></p>
+    </div>
+</div>
 </body>
 </html>

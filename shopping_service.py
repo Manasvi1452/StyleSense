@@ -19,16 +19,14 @@ def match_products(structured_queries, budget_limit, gender):
 
     gender_term = "women" if gender.lower() == "female" else "men"
 
-    for category, query in structured_queries.items():
+    fallback_terms = {
+        "CLOTHING": ["outfit", "apparel"],
+        "FOOTWEAR": ["shoes", "sandals", "sneakers", "heels", "loafers"],
+        "JEWELLERY": ["jewellery", "accessories"],
+        "ACCESSORY": ["fashion accessory", "handbag", "watch"]
+    }
 
-        if category not in categorized_products:
-            continue
-
-        # 🔥 CLEAN AI PRICE TEXT
-        query = re.sub(r"\(.*?\)", "", query).strip()
-
-        search_query = f"{query} {gender_term} under {budget_limit} INR"
-
+    def fetch_shopping_results(search_query):
         params = {
             "engine": "google_shopping",
             "q": search_query,
@@ -45,26 +43,52 @@ def match_products(structured_queries, budget_limit, gender):
                 timeout=10
             )
             data = response.json()
-        except:
+        except Exception:
+            return []
+
+        return data.get("shopping_results", [])
+
+    for category, query in structured_queries.items():
+
+        if category not in categorized_products:
             continue
 
-        if "shopping_results" not in data:
-            continue
+        # 🔥 CLEAN AI PRICE TEXT
+        query = re.sub(r"\(.*?\)", "", query).strip()
 
-        for item in data["shopping_results"][:4]:
+        queries_to_try = [f"{query} {gender_term} under {budget_limit} INR"]
+        for term in fallback_terms.get(category, []):
+            queries_to_try.append(f"{term} {gender_term} under {budget_limit} INR")
 
-            link = item.get("product_link") or item.get("link")
-            if not link:
+        seen_links = set()
+        collected = 0
+
+        for search_query in queries_to_try:
+            if collected >= 4:
+                break
+
+            results = fetch_shopping_results(search_query)
+            if not results:
                 continue
 
-            product = {
-                "name": item.get("title"),
-                "brand": item.get("source"),
-                "price": item.get("price"),
-                "image": item.get("thumbnail"),
-                "link": link
-            }
+            for item in results:
+                if collected >= 4:
+                    break
 
-            categorized_products[category].append(product)
+                link = item.get("product_link") or item.get("link")
+                if not link or link in seen_links:
+                    continue
+
+                seen_links.add(link)
+                product = {
+                    "name": item.get("title"),
+                    "brand": item.get("source"),
+                    "price": item.get("price"),
+                    "image": item.get("thumbnail"),
+                    "link": link
+                }
+
+                categorized_products[category].append(product)
+                collected += 1
 
     return categorized_products

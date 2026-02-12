@@ -2,172 +2,36 @@
 <html>
 <head>
     <title>StyleSense+ Results</title>
-
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #FAF8FF;
-            margin: 0;
-            padding: 0;
-        }
-
-        .site-title {
-            text-align: center;
-            font-size: 34px;
-            font-weight: bold;
-            color: #7B4AE2;
-            margin-top: 30px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        .card {
-            background: #FFFFFF;
-            border-radius: 18px;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(123, 74, 226, 0.15);
-            margin-bottom: 30px;
-        }
-
-        h2 {
-            color: #7B4AE2;
-        }
-
-        button {
-            background: #C8A2FF;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 18px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #4B2E83;
-            transition: 0.3s;
-            margin-right: 8px;
-            font-size: 13px;
-        }
-
-        button:hover {
-            background: #7B4AE2;
-            color: white;
-        }
-
-        .toggle-buttons {
-            margin-bottom: 15px;
-        }
-
-        .styling-text {
-            line-height: 1.6;
-            font-size: 15px;
-            margin-bottom: 15px;
-        }
-
-        /* ----------- SMALLER CAROUSEL ----------- */
-
-        .carousel {
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            padding: 8px 2px;
-            scroll-behavior: smooth;
-        }
-
-        .carousel::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .carousel::-webkit-scrollbar-thumb {
-            background: #C8A2FF;
-            border-radius: 10px;
-        }
-
-        /* ----------- MUCH SMALLER CARDS ----------- */
-
-        .product-card {
-            min-width: 140px;
-            max-width: 140px;
-            background: white;
-            padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(123,74,226,0.12);
-            flex-shrink: 0;
-            transition: 0.2s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .product-card strong {
-            font-size: 12px;
-            display: block;
-            margin-top: 6px;
-            height: 30px;
-            overflow: hidden;
-        }
-
-        .product-card span {
-            font-size: 11px;
-            color: #555;
-        }
-
-        .product-card a {
-            display: inline-block;
-            margin-top: 6px;
-            padding: 4px 10px;
-            background: #7B4AE2;
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-size: 11px;
-        }
-
-        .product-card a:hover {
-            background: #C8A2FF;
-            color: #4B2E83;
-        }
-
-        .image-preview {
-            border-radius: 15px;
-            margin-top: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<div class="site-title">💜 StyleSense+</div>
+<div class="fashion-bg" aria-hidden="true">
+    <span class="float-item item-1"></span>
+    <span class="float-item item-2"></span>
+    <span class="float-item item-3"></span>
+    <span class="float-item item-4"></span>
+    <span class="float-item item-5"></span>
+</div>
+
+<div class="site-title">StyleSense+</div>
+<p class="site-tagline">Your personalized fashion board is ready.</p>
 
 <div class="container">
 
-    <!-- Skin Tone Card -->
     <div class="card">
         <h2>Detected Skin Tone: {{ result.tone }}</h2>
-        <img class="image-preview"
-             src="{{ url_for('static', filename='uploads/' + image) }}"
-             width="280">
+        <img class="image-preview" src="{{ url_for('static', filename='uploads/' + image) }}" alt="Uploaded photo preview">
     </div>
 
-    <!-- Style Toggle -->
     <div class="card">
         <h2>Choose Your Style</h2>
         <div class="toggle-buttons">
-            <button onclick="showStyle('ethnic')">🇮🇳 Ethnic</button>
-            <button onclick="showStyle('western')">👗 Western</button>
+            <button onclick="showStyle('ethnic')">Ethnic</button>
+            <button onclick="showStyle('western')">Western</button>
         </div>
     </div>
 
-    <!-- ================= ETHNIC SECTION ================= -->
     <div id="ethnic-section" class="card">
         <h2>Ethnic Styling</h2>
         <p class="styling-text">{{ styling_ethnic }}</p>
@@ -183,7 +47,7 @@
             <div class="carousel">
                 {% for product in products_ethnic[category] %}
                 <div class="product-card">
-                    <img src="{{ product.image }}">
+                    <img src="{{ product.image }}" alt="Product image">
                     <strong>{{ product.name }}</strong>
                     <span>{{ product.price }}</span>
                     <a href="{{ product.link }}" target="_blank">Buy</a>
@@ -194,7 +58,6 @@
         {% endfor %}
     </div>
 
-    <!-- ================= WESTERN SECTION ================= -->
     <div id="western-section" class="card" style="display:none;">
         <h2>Western Styling</h2>
         <p class="styling-text">{{ styling_western }}</p>
@@ -210,7 +73,7 @@
             <div class="carousel">
                 {% for product in products_western[category] %}
                 <div class="product-card">
-                    <img src="{{ product.image }}">
+                    <img src="{{ product.image }}" alt="Product image">
                     <strong>{{ product.name }}</strong>
                     <span>{{ product.price }}</span>
                     <a href="{{ product.link }}" target="_blank">Buy</a>

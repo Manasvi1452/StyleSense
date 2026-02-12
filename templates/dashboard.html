@@ -2,222 +2,87 @@
 <html>
 <head>
     <title>StyleSense+ Dashboard</title>
-
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #FAF8FF;
-            margin: 0;
-            padding: 0;
-        }
-
-        .site-title {
-            text-align: center;
-            font-size: 36px;
-            font-weight: bold;
-            color: #7B4AE2;
-            margin-top: 30px;
-        }
-
-        .container {
-            max-width: 650px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        .card {
-            background: #FFFFFF;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(123, 74, 226, 0.15);
-        }
-
-        label {
-            font-weight: bold;
-            color: #7B4AE2;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }
-
-        button {
-            background: #C8A2FF;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #4B2E83;
-            transition: 0.3s;
-            margin-right: 10px;
-        }
-
-        button:hover {
-            background: #7B4AE2;
-            color: white;
-        }
-
-        /* CAMERA */
-
-        .camera-wrapper {
-            position: relative;
-            width: 100%;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        #video {
-            width: 100%;
-        }
-
-        #flash {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .flash-animation {
-            animation: flashEffect 0.4s ease;
-        }
-
-        @keyframes flashEffect {
-            0% { opacity: 0.9; }
-            100% { opacity: 0; }
-        }
-
-        #canvas {
-            width: 100%;
-            display: none;
-            border-radius: 15px;
-        }
-
-        /* VOICE OVERLAY */
-
-        #recordingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(200,162,255,0.92);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .overlay-content {
-            text-align: center;
-            color: white;
-        }
-
-        .pulse-circle {
-            width: 140px;
-            height: 140px;
-            background: #7B4AE2;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-            margin: auto;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.9); opacity: 0.7; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.7; }
-        }
-
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<div class="site-title">💜 StyleSense+</div>
+<div class="fashion-bg" aria-hidden="true">
+    <span class="float-item item-1"></span>
+    <span class="float-item item-2"></span>
+    <span class="float-item item-3"></span>
+    <span class="float-item item-4"></span>
+    <span class="float-item item-5"></span>
+</div>
+
+<div class="site-title">StyleSense+</div>
+<p class="site-tagline">Build your outfit story with voice, mood, and occasion.</p>
 
 <div class="container">
-<div class="card">
+    <div class="card">
 
-<!-- VOICE BUTTON -->
-<div style="text-align:center; margin-bottom:20px;">
-    <button type="button" onclick="startListening()">🎤 Speak Preferences</button>
+        <div class="voice-button-wrapper">
+            <button type="button" onclick="startListening()">Speak Preferences</button>
+        </div>
+
+        <form method="POST" action="/analyze" enctype="multipart/form-data">
+
+            <label>Capture or Upload Image</label>
+
+            <div class="camera-wrapper">
+                <video id="video" autoplay muted></video>
+                <div id="flash"></div>
+            </div>
+
+            <canvas id="canvas"></canvas>
+
+            <p class="top-gap">
+                <button type="button" onclick="captureImage()">Capture</button>
+                <button type="button" onclick="retakeImage()" id="retakeBtn" style="display:none;">Retake</button>
+            </p>
+
+            <input type="hidden" name="captured_image" id="captured_image">
+
+            <div class="or-divider">OR</div>
+
+            <input type="file" name="uploaded_image" accept="image/*">
+
+            <label>Gender</label>
+            <select name="gender" id="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+
+            <label>Occasion</label>
+            <select name="occasion" id="occasion" required>
+                <option value="Casual">Casual</option>
+                <option value="Office">Office</option>
+                <option value="Party">Party</option>
+                <option value="Wedding">Wedding</option>
+            </select>
+
+            <label>Mood</label>
+            <input type="text" id="mood" name="mood" required>
+
+            <label>Weather</label>
+            <select name="weather" id="weather" required>
+                <option value="Hot">Hot</option>
+                <option value="Cold">Cold</option>
+                <option value="Rainy">Rainy</option>
+            </select>
+
+            <label>Budget</label>
+            <select name="budget" id="budget" required>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+
+            <button type="submit">Get Recommendations</button>
+
+        </form>
+    </div>
 </div>
 
-<form method="POST" action="/analyze" enctype="multipart/form-data">
-
-<label>Capture or Upload Image</label>
-
-<!-- CAMERA -->
-<div class="camera-wrapper">
-    <video id="video" autoplay muted></video>
-    <div id="flash"></div>
-</div>
-
-<canvas id="canvas"></canvas>
-
-<br>
-
-<button type="button" onclick="captureImage()">📸 Capture</button>
-<button type="button" onclick="retakeImage()" id="retakeBtn" style="display:none;">🔄 Retake</button>
-
-<input type="hidden" name="captured_image" id="captured_image">
-
-<br><br>
-
-<div style="text-align:center; font-weight:bold; color:#7B4AE2;">OR</div>
-
-<br>
-
-<input type="file" name="uploaded_image" accept="image/*">
-
-<label>Gender</label>
-<select name="gender" id="gender" required>
-    <option value="Male">Male</option>
-    <option value="Female">Female</option>
-</select>
-
-<label>Occasion</label>
-<select name="occasion" id="occasion" required>
-    <option value="Casual">Casual</option>
-    <option value="Office">Office</option>
-    <option value="Party">Party</option>
-    <option value="Wedding">Wedding</option>
-</select>
-
-<label>Mood</label>
-<input type="text" id="mood" name="mood" required>
-
-<label>Weather</label>
-<select name="weather" id="weather" required>
-    <option value="Hot">Hot</option>
-    <option value="Cold">Cold</option>
-    <option value="Rainy">Rainy</option>
-</select>
-
-<label>Budget</label>
-<select name="budget" id="budget" required>
-    <option value="Low">Low</option>
-    <option value="Medium">Medium</option>
-    <option value="High">High</option>
-</select>
-
-<br><br>
-<button type="submit">✨ Get Recommendations</button>
-
-</form>
-</div>
-</div>
-
-<!-- VOICE OVERLAY -->
 <div id="recordingOverlay">
     <div class="overlay-content">
         <div class="pulse-circle"></div>
@@ -227,8 +92,6 @@
 </div>
 
 <script>
-
-/* ---------------- CAMERA ---------------- */
 
 let videoStream;
 
@@ -276,8 +139,6 @@ function retakeImage() {
     document.getElementById("retakeBtn").style.display = "none";
     startCamera();
 }
-
-/* ---------------- VOICE ---------------- */
 
 let recognition;
 
