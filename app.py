@@ -12,6 +12,7 @@ from shopping_service import match_products
 import os
 import re
 from urllib.parse import quote_plus
+from datetime import datetime
 
 load_dotenv()
 
@@ -31,6 +32,19 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+
+
+class RecommendationHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    skin_tone = db.Column(db.String(50))
+    occasion = db.Column(db.String(50))
+    mood = db.Column(db.String(250))
+    weather = db.Column(db.String(50))
+    budget = db.Column(db.String(20))
+    styling_ethnic = db.Column(db.Text)
+    styling_western = db.Column(db.Text)
 
 
 @login_manager.user_loader
@@ -157,7 +171,14 @@ def login():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html", username=current_user.username)
+    histories = (
+        RecommendationHistory.query
+        .filter_by(user_id=current_user.id)
+        .order_by(RecommendationHistory.created_at.desc())
+        .limit(5)
+        .all()
+    )
+    return render_template("dashboard.html", username=current_user.username, histories=histories)
 
 
 @app.route("/analyze", methods=["POST"])
@@ -309,6 +330,19 @@ def analyze():
 
     products_western = match_products(queries_western, budget_limit, gender)
     products_western = fill_missing_products(products_western, queries_western, budget_limit, gender)
+
+    history = RecommendationHistory(
+        user_id=current_user.id,
+        skin_tone=skin_tone,
+        occasion=occasion,
+        mood=(mood or "")[:250],
+        weather=weather,
+        budget=budget,
+        styling_ethnic=(styling_ethnic or "")[:1000],
+        styling_western=(styling_western or "")[:1000]
+    )
+    db.session.add(history)
+    db.session.commit()
 
     # -------------------------
     # Render Results

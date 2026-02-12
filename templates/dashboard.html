@@ -18,6 +18,26 @@
 <p class="site-tagline">Build your outfit story with voice, mood, and occasion.</p>
 
 <div class="container">
+    <div class="card history-card">
+        <h2>Recent Recommendations</h2>
+        {% if histories %}
+            <div class="history-list">
+                {% for item in histories %}
+                    <div class="history-item">
+                        <div class="history-meta">
+                            <strong>{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</strong>
+                            <span>{{ item.occasion }} | {{ item.weather }} | {{ item.budget }} | Skin: {{ item.skin_tone }}</span>
+                        </div>
+                        <p><b>Ethnic:</b> {{ (item.styling_ethnic or '')[:120] }}{% if item.styling_ethnic and item.styling_ethnic|length > 120 %}...{% endif %}</p>
+                        <p><b>Western:</b> {{ (item.styling_western or '')[:120] }}{% if item.styling_western and item.styling_western|length > 120 %}...{% endif %}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="history-empty">No history yet. Generate your first recommendation below.</p>
+        {% endif %}
+    </div>
+
     <div class="card">
 
         <div class="voice-button-wrapper">

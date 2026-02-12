@@ -150,6 +150,51 @@ a:hover {
     margin-bottom: 20px;
 }
 
+.history-card {
+    margin-bottom: 16px;
+}
+
+.history-list {
+    display: grid;
+    gap: 10px;
+}
+
+.history-item {
+    border: 1px solid rgba(123, 74, 226, 0.16);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.history-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 6px;
+}
+
+.history-meta strong {
+    color: #5d3ca9;
+    font-size: 0.9rem;
+}
+
+.history-meta span {
+    font-size: 0.8rem;
+    color: rgba(47, 42, 65, 0.72);
+}
+
+.history-item p {
+    margin: 4px 0;
+    font-size: 0.88rem;
+    color: rgba(47, 42, 65, 0.88);
+}
+
+.history-empty {
+    margin: 0;
+    font-size: 0.92rem;
+    color: rgba(47, 42, 65, 0.7);
+}
+
 .camera-wrapper {
     position: relative;
     width: 100%;
