@@ -68,8 +68,6 @@
             margin-bottom: 25px;
         }
 
-        /* Overlay */
-
         #recordingOverlay {
             position: fixed;
             top: 0;
@@ -117,7 +115,6 @@
 <div class="container">
     <div class="card">
 
-        <!-- 🎤 VOICE BUTTON MOVED TO TOP -->
         <div class="voice-button-wrapper">
             <button type="button" onclick="startListening()">
                 🎤 Speak Preferences
@@ -168,12 +165,10 @@
     </div>
 </div>
 
-<!-- Recording Overlay -->
 <div id="recordingOverlay">
     <div class="overlay-content">
         <div class="pulse-circle"></div>
         <h2>Listening...</h2>
-
         <div class="overlay-buttons">
             <button onclick="stopListening()">Stop</button>
             <button onclick="cancelListening()">Cancel</button>
@@ -191,47 +186,14 @@ function startListening() {
     recognition.lang = "en-IN";
 
     recognition.start();
-
     document.getElementById("recordingOverlay").style.display = "flex";
 
     recognition.onresult = function(event) {
 
         const transcript = event.results[0][0].transcript.toLowerCase();
+        console.log("Transcript:", transcript);
 
-        document.getElementById("mood").value = transcript;
-
-        if (transcript.includes("female") || transcript.includes("woman"))
-            document.getElementById("gender").value = "Female";
-
-        if (transcript.includes("male") || transcript.includes("man"))
-            document.getElementById("gender").value = "Male";
-
-        if (transcript.includes("wedding"))
-            document.getElementById("occasion").value = "Wedding";
-
-        if (transcript.includes("party"))
-            document.getElementById("occasion").value = "Party";
-
-        if (transcript.includes("office"))
-            document.getElementById("occasion").value = "Office";
-
-        if (transcript.includes("cold"))
-            document.getElementById("weather").value = "Cold";
-
-        if (transcript.includes("rain"))
-            document.getElementById("weather").value = "Rainy";
-
-        if (transcript.includes("hot"))
-            document.getElementById("weather").value = "Hot";
-
-        if (transcript.includes("low"))
-            document.getElementById("budget").value = "Low";
-
-        if (transcript.includes("medium"))
-            document.getElementById("budget").value = "Medium";
-
-        if (transcript.includes("high"))
-            document.getElementById("budget").value = "High";
+        analyzeSpeech(transcript);
 
         stopListening();
     };
@@ -240,6 +202,77 @@ function startListening() {
         stopListening();
     };
 }
+
+/* ---------------- SMART ANALYZER ---------------- */
+
+function analyzeSpeech(text) {
+
+    // Always fill mood with full text
+    document.getElementById("mood").value = text;
+
+    /* ----------- GENDER ----------- */
+    const genderMap = {
+        "female": ["female", "woman", "girl", "lady"],
+        "male": ["male", "man", "boy", "gentleman"]
+    };
+
+    setFieldFromKeywords("gender", genderMap, text, {
+        "female": "Female",
+        "male": "Male"
+    });
+
+    /* ----------- OCCASION ----------- */
+    const occasionMap = {
+        "Wedding": ["wedding", "marriage", "bride"],
+        "Party": ["party", "birthday", "celebration"],
+        "Office": ["office", "work", "formal"],
+        "Casual": ["casual", "daily", "normal"]
+    };
+
+    setFieldFromKeywords("occasion", occasionMap, text);
+
+    /* ----------- WEATHER ----------- */
+    const weatherMap = {
+        "Cold": ["cold", "winter", "chilly"],
+        "Rainy": ["rain", "rainy", "monsoon"],
+        "Hot": ["hot", "summer", "sunny"]
+    };
+
+    setFieldFromKeywords("weather", weatherMap, text);
+
+    /* ----------- BUDGET ----------- */
+    const budgetMap = {
+        "Low": ["low budget", "cheap", "affordable", "budget friendly"],
+        "Medium": ["medium budget", "mid range", "moderate"],
+        "High": ["high budget", "premium", "expensive", "luxury"]
+    };
+
+    setFieldFromKeywords("budget", budgetMap, text);
+}
+
+/* -------------- Helper Function -------------- */
+
+function setFieldFromKeywords(fieldId, map, text, valueMap = null) {
+
+    for (const key in map) {
+        const keywords = map[key];
+
+        for (let keyword of keywords) {
+            if (text.includes(keyword)) {
+
+                if (valueMap) {
+                    document.getElementById(fieldId).value = valueMap[key];
+                } else {
+                    document.getElementById(fieldId).value = key;
+                }
+
+                return; // Stop after first match
+            }
+        }
+    }
+}
+
+/* ---------------- Controls ---------------- */
 
 function stopListening() {
     if (recognition) recognition.stop();
@@ -252,6 +285,7 @@ function cancelListening() {
 }
 
 </script>
+
 
 </body>
 </html>
