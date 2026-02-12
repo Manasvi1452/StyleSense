@@ -96,24 +96,49 @@ def dashboard():
 @login_required
 def analyze():
 
-    # Handle image upload
-    if "image" in request.files and request.files["image"].filename != "":
-        file = request.files["image"]
-        filename = secure_filename(file.filename)
-        upload_path = os.path.join("static/uploads", filename)
-        file.save(upload_path)
+    import base64
+    from datetime import datetime
+
+    upload_folder = os.path.join("static", "uploads")
+    os.makedirs(upload_folder, exist_ok=True)
+
+    captured_image = request.form.get("captured_image")
+    uploaded_file = request.files.get("uploaded_image")
+
+    # CASE 1: Webcam capture
+    if captured_image:
+        header, encoded = captured_image.split(",", 1)
+        image_data = base64.b64decode(encoded)
+
+        filename = f"capture_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+        upload_path = os.path.join(upload_folder, filename)
+
+        with open(upload_path, "wb") as f:
+            f.write(image_data)
+
+    # CASE 2: File upload
+    elif uploaded_file and uploaded_file.filename != "":
+        filename = secure_filename(uploaded_file.filename)
+        upload_path = os.path.join(upload_folder, filename)
+        uploaded_file.save(upload_path)
+
+    # CASE 3: Nothing provided
     else:
-        filename = request.form["image"]
-        upload_path = os.path.join("static/uploads", filename)
+        return "Please capture or upload an image."
 
-    # Get form values
-    gender = request.form["gender"]
-    occasion = request.form["occasion"]
-    mood = request.form["mood"]
-    weather = request.form["weather"]
-    budget = request.form["budget"]
 
-    # Detect skin tone
+    # -------------------------
+    # Get Form Values
+    # -------------------------
+    gender = request.form.get("gender")
+    occasion = request.form.get("occasion")
+    mood = request.form.get("mood")
+    weather = request.form.get("weather")
+    budget = request.form.get("budget")
+
+    # -------------------------
+    # Detect Skin Tone
+    # -------------------------
     result = detect_skin_tone(upload_path)
     skin_tone = result["tone"]
 
@@ -138,11 +163,9 @@ def analyze():
 
         for line in lines:
             line = line.strip()
-
             if not line:
                 continue
 
-            # Accept ":" or "-"
             if ":" in line:
                 category, value = line.split(":", 1)
             elif "-" in line:
@@ -170,6 +193,43 @@ def analyze():
         budget,
         "Ethnic"
     )
+
+    recommendation_ethnic = generate_recommendation(prompt_ethnic)
+    styling_ethnic, queries_ethnic = parse_recommendation(recommendation_ethnic)
+
+    products_ethnic = match_products(queries_ethnic, budget_limit, gender)
+
+    # -------------------------
+    # Generate Western
+    # -------------------------
+    prompt_western = build_prompt(
+        skin_tone,
+        gender,
+        occasion,
+        mood,
+        weather,
+        budget,
+        "Western"
+    )
+
+    recommendation_western = generate_recommendation(prompt_western)
+    styling_western, queries_western = parse_recommendation(recommendation_western)
+
+    products_western = match_products(queries_western, budget_limit, gender)
+
+    # -------------------------
+    # Render Results
+    # -------------------------
+    return render_template(
+        "results.html",
+        result=result,
+        image=filename,
+        styling_ethnic=styling_ethnic,
+        styling_western=styling_western,
+        products_ethnic=products_ethnic,
+        products_western=products_western
+    )
+
 
     recommendation_ethnic = generate_recommendation(prompt_ethnic)
     styling_ethnic, queries_ethnic = parse_recommendation(recommendation_ethnic)
