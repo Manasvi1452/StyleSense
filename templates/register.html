@@ -4,29 +4,63 @@
     <title>Register</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-<div class="fashion-bg" aria-hidden="true">
-    <span class="float-item item-1"></span>
-    <span class="float-item item-2"></span>
-    <span class="float-item item-3"></span>
-    <span class="float-item item-4"></span>
-    <span class="float-item item-5"></span>
-</div>
+<body class="auth-page">
 
-<div class="site-title">StyleSense+</div>
-<p class="site-tagline">Create your style profile in seconds.</p>
-
-<div class="auth-shell">
-    <div class="card">
-        <h2>Register</h2>
-        <form method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Register</button>
-        </form>
-        <p class="top-gap"><a href="/login">Already have an account? Login</a></p>
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">StyleSense+</div>
+        <nav class="topbar-nav">
+            <a href="/login">Login</a>
+        </nav>
     </div>
-</div>
+</header>
+
+<div class="auth-hero" aria-hidden="true"></div>
+
+<main class="shell">
+    <div class="page-head">
+        <h1 class="page-title">Create Account</h1>
+        <p class="page-subtitle">Set Up Your Personal Styling Profile</p>
+    </div>
+
+    <div class="auth-grid">
+        <section class="card">
+            <h2>What You Get</h2>
+            <div class="auth-points">
+                <div class="point">Context-aware recommendations for every event</div>
+                <div class="point">Fast compare between ethnic and western looks</div>
+                <div class="point">Direct shopping links for execution</div>
+            </div>
+            <div class="reference-panel" aria-hidden="true">
+                <div class="ref-topbar"></div>
+                <div class="ref-grid">
+                    <div class="ref-block ref-brand"></div>
+                    <div class="ref-block ref-soft"></div>
+                    <div class="ref-block ref-line"></div>
+                    <div class="ref-block ref-ink"></div>
+                </div>
+                <div class="media-caption">Smart Styling Preview</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Registration</h2>
+            <form method="POST">
+                <label for="username">Username</label>
+                <input id="username" type="text" name="username" placeholder="Choose username" required>
+
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" placeholder="you@example.com" required>
+
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" placeholder="Create password" required>
+
+                <button class="btn-full" type="submit">Register</button>
+            </form>
+            <p class="top-gap"><a href="/login">Already have an account? Login</a></p>
+        </section>
+    </div>
+</main>
+
 </body>
 </html>

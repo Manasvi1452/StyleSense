@@ -6,102 +6,137 @@
 </head>
 <body>
 
-<div class="fashion-bg" aria-hidden="true">
-    <span class="float-item item-1"></span>
-    <span class="float-item item-2"></span>
-    <span class="float-item item-3"></span>
-    <span class="float-item item-4"></span>
-    <span class="float-item item-5"></span>
-</div>
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">StyleSense+</div>
+        <nav class="topbar-nav">
+            <span class="user-chip">{{ username }}</span>
+            <a href="/logout">Logout</a>
+        </nav>
+    </div>
+</header>
 
-<div class="site-title">StyleSense+</div>
-<p class="site-tagline">Build your outfit story with voice, mood, and occasion.</p>
+<main class="shell">
+    <div class="page-head">
+        <h1 class="page-title">Recommendation Dashboard</h1>
+        <p class="page-subtitle">Capture Preferences, Generate Looks, Track History</p>
+    </div>
 
-<div class="container">
-    <div class="card history-card">
-        <h2>Recent Recommendations</h2>
-        {% if histories %}
-            <div class="history-list">
-                {% for item in histories %}
-                    <div class="history-item">
-                        <div class="history-meta">
-                            <strong>{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</strong>
-                            <span>{{ item.occasion }} | {{ item.weather }} | {{ item.budget }} | Skin: {{ item.skin_tone }}</span>
-                        </div>
-                        <p><b>Ethnic:</b> {{ (item.styling_ethnic or '')[:120] }}{% if item.styling_ethnic and item.styling_ethnic|length > 120 %}...{% endif %}</p>
-                        <p><b>Western:</b> {{ (item.styling_western or '')[:120] }}{% if item.styling_western and item.styling_western|length > 120 %}...{% endif %}</p>
+    <div class="dash-grid">
+        <section class="card">
+            <h2>Generate New Recommendation</h2>
+
+            <div class="form-actions">
+                <button type="button" onclick="startListening()">Speak Preferences</button>
+            </div>
+
+            <form class="form-layout" method="POST" action="/analyze" enctype="multipart/form-data">
+                <section class="form-section">
+                    <h3>Image Input</h3>
+                    <label>Capture with webcam</label>
+
+                    <div class="camera-wrapper">
+                        <video id="video" autoplay muted></video>
+                        <div id="flash"></div>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="history-empty">No history yet. Generate your first recommendation below.</p>
-        {% endif %}
+
+                    <canvas id="canvas"></canvas>
+
+                    <div class="form-actions">
+                        <button type="button" onclick="captureImage()">Capture</button>
+                        <button type="button" class="btn-secondary" onclick="retakeImage()" id="retakeBtn" style="display:none;">Retake</button>
+                    </div>
+
+                    <input type="hidden" name="captured_image" id="captured_image">
+
+                    <div class="or-divider">OR Upload Image</div>
+                    <input type="file" name="uploaded_image" accept="image/*">
+                </section>
+
+                <section class="form-section">
+                    <h3>Preference Details</h3>
+                    <div class="form-grid two-col">
+                        <div class="field-group">
+                            <label>Gender</label>
+                            <select name="gender" id="gender" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Occasion</label>
+                            <select name="occasion" id="occasion" required>
+                                <option value="Casual">Casual</option>
+                                <option value="Office">Office</option>
+                                <option value="Party">Party</option>
+                                <option value="Wedding">Wedding</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Weather</label>
+                            <select name="weather" id="weather" required>
+                                <option value="Hot">Hot</option>
+                                <option value="Cold">Cold</option>
+                                <option value="Rainy">Rainy</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Budget</label>
+                            <div class="budget-wrap">
+                                <input
+                                    type="range"
+                                    id="budget"
+                                    name="budget"
+                                    min="2000"
+                                    max="20000"
+                                    step="1000"
+                                    value="6000"
+                                    oninput="updateBudgetDisplay()"
+                                    required
+                                >
+                                <div class="budget-meta">
+                                    <strong id="budgetValue">INR 6,000</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-group grid-span-2">
+                            <label>Mood</label>
+                            <input type="text" id="mood" name="mood" required>
+                        </div>
+                    </div>
+                </section>
+
+                <button class="btn-full" type="submit">Get Recommendations</button>
+            </form>
+        </section>
+
+        <aside class="panel-stack">
+            <section class="card">
+                <h2>Recent Recommendations</h2>
+                {% if histories %}
+                    <div class="history-list">
+                        {% for item in histories %}
+                            <div class="history-item">
+                                <div class="history-meta">
+                                    <strong>{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</strong>
+                                    <span>{{ item.occasion }} | {{ item.weather }} | {{ item.budget }} | Skin: {{ item.skin_tone }}</span>
+                                </div>
+                                <p><b>Ethnic:</b> {{ (item.styling_ethnic or '')[:120] }}{% if item.styling_ethnic and item.styling_ethnic|length > 120 %}...{% endif %}</p>
+                                <p><b>Western:</b> {{ (item.styling_western or '')[:120] }}{% if item.styling_western and item.styling_western|length > 120 %}...{% endif %}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="muted">No history yet. Generate your first recommendation.</p>
+                {% endif %}
+            </section>
+        </aside>
     </div>
-
-    <div class="card">
-
-        <div class="voice-button-wrapper">
-            <button type="button" onclick="startListening()">Speak Preferences</button>
-        </div>
-
-        <form method="POST" action="/analyze" enctype="multipart/form-data">
-
-            <label>Capture or Upload Image</label>
-
-            <div class="camera-wrapper">
-                <video id="video" autoplay muted></video>
-                <div id="flash"></div>
-            </div>
-
-            <canvas id="canvas"></canvas>
-
-            <p class="top-gap">
-                <button type="button" onclick="captureImage()">Capture</button>
-                <button type="button" onclick="retakeImage()" id="retakeBtn" style="display:none;">Retake</button>
-            </p>
-
-            <input type="hidden" name="captured_image" id="captured_image">
-
-            <div class="or-divider">OR</div>
-
-            <input type="file" name="uploaded_image" accept="image/*">
-
-            <label>Gender</label>
-            <select name="gender" id="gender" required>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-            </select>
-
-            <label>Occasion</label>
-            <select name="occasion" id="occasion" required>
-                <option value="Casual">Casual</option>
-                <option value="Office">Office</option>
-                <option value="Party">Party</option>
-                <option value="Wedding">Wedding</option>
-            </select>
-
-            <label>Mood</label>
-            <input type="text" id="mood" name="mood" required>
-
-            <label>Weather</label>
-            <select name="weather" id="weather" required>
-                <option value="Hot">Hot</option>
-                <option value="Cold">Cold</option>
-                <option value="Rainy">Rainy</option>
-            </select>
-
-            <label>Budget</label>
-            <select name="budget" id="budget" required>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-            </select>
-
-            <button type="submit">Get Recommendations</button>
-
-        </form>
-    </div>
-</div>
+</main>
 
 <div id="recordingOverlay">
     <div class="overlay-content">
@@ -112,11 +147,11 @@
 </div>
 
 <script>
-
 let videoStream;
 
 document.addEventListener("DOMContentLoaded", function() {
     startCamera();
+    updateBudgetDisplay();
 });
 
 function startCamera() {
@@ -129,14 +164,12 @@ function startCamera() {
 }
 
 function captureImage() {
-
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
     ctx.drawImage(video, 0, 0);
 
     const imageData = canvas.toDataURL("image/jpeg");
@@ -163,7 +196,6 @@ function retakeImage() {
 let recognition;
 
 function startListening() {
-
     recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = "en-IN";
     recognition.start();
@@ -171,7 +203,6 @@ function startListening() {
     document.getElementById("recordingOverlay").style.display = "flex";
 
     recognition.onresult = function(event) {
-
         const transcript = event.results[0][0].transcript.toLowerCase();
         document.getElementById("mood").value = transcript;
 
@@ -200,13 +231,15 @@ function startListening() {
             document.getElementById("weather").value = "Hot";
 
         if (transcript.includes("low"))
-            document.getElementById("budget").value = "Low";
+            document.getElementById("budget").value = 2000;
 
         if (transcript.includes("medium"))
-            document.getElementById("budget").value = "Medium";
+            document.getElementById("budget").value = 6000;
 
         if (transcript.includes("high"))
-            document.getElementById("budget").value = "High";
+            document.getElementById("budget").value = 20000;
+
+        updateBudgetDisplay();
 
         stopListening();
     };
@@ -221,6 +254,13 @@ function stopListening() {
     document.getElementById("recordingOverlay").style.display = "none";
 }
 
+function updateBudgetDisplay() {
+    const slider = document.getElementById("budget");
+    const amount = parseInt(slider.value, 10);
+    const value = document.getElementById("budgetValue");
+
+    value.textContent = "INR " + amount.toLocaleString("en-IN");
+}
 </script>
 
 </body>

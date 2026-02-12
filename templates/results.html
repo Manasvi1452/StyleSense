@@ -6,85 +6,94 @@
 </head>
 <body>
 
-<div class="fashion-bg" aria-hidden="true">
-    <span class="float-item item-1"></span>
-    <span class="float-item item-2"></span>
-    <span class="float-item item-3"></span>
-    <span class="float-item item-4"></span>
-    <span class="float-item item-5"></span>
-</div>
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">StyleSense+</div>
+        <nav class="topbar-nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </div>
+</header>
 
-<div class="site-title">StyleSense+</div>
-<p class="site-tagline">Your personalized fashion board is ready.</p>
-
-<div class="container">
-
-    <div class="card">
-        <h2>Detected Skin Tone: {{ result.tone }}</h2>
-        <img class="image-preview" src="{{ url_for('static', filename='uploads/' + image) }}" alt="Uploaded photo preview">
+<main class="shell">
+    <div class="page-head">
+        <h1 class="page-title">Recommendation Results</h1>
+        <p class="page-subtitle">Compare Styling Modes And Explore Product Options</p>
     </div>
 
-    <div class="card">
-        <h2>Choose Your Style</h2>
-        <div class="toggle-buttons">
-            <button onclick="showStyle('ethnic')">Ethnic</button>
-            <button onclick="showStyle('western')">Western</button>
-        </div>
-    </div>
+    <div class="results-grid">
+        <aside class="panel-stack">
+            <section class="card">
+                <h2>Profile Snapshot</h2>
+                <p class="muted">Detected skin tone: <b>{{ result.tone }}</b></p>
+                <img class="summary-image" src="{{ url_for('static', filename='uploads/' + image) }}" alt="Uploaded photo preview">
+            </section>
 
-    <div id="ethnic-section" class="card">
-        <h2>Ethnic Styling</h2>
-        <p class="styling-text">{{ styling_ethnic }}</p>
+            <section class="card">
+                <h2>Style View</h2>
+                <div class="toggle-buttons">
+                    <button onclick="showStyle('ethnic')">Ethnic</button>
+                    <button class="btn-secondary" onclick="showStyle('western')">Western</button>
+                </div>
+            </section>
+        </aside>
 
-        <div class="toggle-buttons">
-            <button onclick="showCategory('ethnic','CLOTHING')">Clothes</button>
-            <button onclick="showCategory('ethnic','FOOTWEAR')">Footwear</button>
-            <button onclick="showCategory('ethnic','JEWELLERY')">Jewellery</button>
-        </div>
+        <section class="panel-stack">
+            <div id="ethnic-section" class="card">
+                <h2>Ethnic Styling</h2>
+                <p class="styling-text">{{ styling_ethnic }}</p>
 
-        {% for category in ['CLOTHING', 'FOOTWEAR', 'JEWELLERY'] %}
-        <div id="ethnic-{{ category }}" class="ethnic-category" style="display:none;">
-            <div class="carousel">
-                {% for product in products_ethnic[category] %}
-                <div class="product-card">
-                    <img src="{{ product.image }}" alt="Product image">
-                    <strong>{{ product.name }}</strong>
-                    <span>{{ product.price }}</span>
-                    <a href="{{ product.link }}" target="_blank">Buy</a>
+                <div class="toggle-buttons">
+                    <button onclick="showCategory('ethnic','CLOTHING')">Clothes</button>
+                    <button class="btn-secondary" onclick="showCategory('ethnic','FOOTWEAR')">Footwear</button>
+                    <button class="btn-secondary" onclick="showCategory('ethnic','JEWELLERY')">Jewellery</button>
+                </div>
+
+                {% for category in ['CLOTHING', 'FOOTWEAR', 'JEWELLERY'] %}
+                <div id="ethnic-{{ category }}" class="ethnic-category category-block" style="display:none;">
+                    <div class="carousel">
+                        {% for product in products_ethnic[category] %}
+                        <div class="product-card">
+                            <img src="{{ product.image }}" alt="Product image">
+                            <strong>{{ product.name }}</strong>
+                            <span>{{ product.price }}</span>
+                            <a href="{{ product.link }}" target="_blank">Buy</a>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
                 {% endfor %}
             </div>
-        </div>
-        {% endfor %}
-    </div>
 
-    <div id="western-section" class="card" style="display:none;">
-        <h2>Western Styling</h2>
-        <p class="styling-text">{{ styling_western }}</p>
+            <div id="western-section" class="card" style="display:none;">
+                <h2>Western Styling</h2>
+                <p class="styling-text">{{ styling_western }}</p>
 
-        <div class="toggle-buttons">
-            <button onclick="showCategory('western','CLOTHING')">Clothes</button>
-            <button onclick="showCategory('western','FOOTWEAR')">Footwear</button>
-            <button onclick="showCategory('western','JEWELLERY')">Jewellery</button>
-        </div>
+                <div class="toggle-buttons">
+                    <button onclick="showCategory('western','CLOTHING')">Clothes</button>
+                    <button class="btn-secondary" onclick="showCategory('western','FOOTWEAR')">Footwear</button>
+                    <button class="btn-secondary" onclick="showCategory('western','JEWELLERY')">Jewellery</button>
+                </div>
 
-        {% for category in ['CLOTHING', 'FOOTWEAR', 'JEWELLERY'] %}
-        <div id="western-{{ category }}" class="western-category" style="display:none;">
-            <div class="carousel">
-                {% for product in products_western[category] %}
-                <div class="product-card">
-                    <img src="{{ product.image }}" alt="Product image">
-                    <strong>{{ product.name }}</strong>
-                    <span>{{ product.price }}</span>
-                    <a href="{{ product.link }}" target="_blank">Buy</a>
+                {% for category in ['CLOTHING', 'FOOTWEAR', 'JEWELLERY'] %}
+                <div id="western-{{ category }}" class="western-category category-block" style="display:none;">
+                    <div class="carousel">
+                        {% for product in products_western[category] %}
+                        <div class="product-card">
+                            <img src="{{ product.image }}" alt="Product image">
+                            <strong>{{ product.name }}</strong>
+                            <span>{{ product.price }}</span>
+                            <a href="{{ product.link }}" target="_blank">Buy</a>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
                 {% endfor %}
             </div>
-        </div>
-        {% endfor %}
+        </section>
     </div>
-
-</div>
+</main>
 
 <script>
 function showStyle(style) {
@@ -98,7 +107,6 @@ function showStyle(style) {
 }
 
 function showCategory(style, category) {
-
     const sections = document.getElementsByClassName(style + "-category");
 
     for (let i = 0; i < sections.length; i++) {

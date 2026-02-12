@@ -53,9 +53,19 @@ def load_user(user_id):
 
 
 def get_budget_limit(budget):
-    if budget == "Low":
+    if isinstance(budget, (int, float)):
+        value = int(budget)
+        return max(1000, min(value, 50000))
+
+    budget_text = (budget or "").strip()
+
+    if budget_text.isdigit():
+        value = int(budget_text)
+        return max(1000, min(value, 50000))
+
+    if budget_text == "Low":
         return 2000
-    elif budget == "Medium":
+    elif budget_text == "Medium":
         return 6000
     else:
         return 20000
@@ -223,7 +233,9 @@ def analyze():
     occasion = request.form.get("occasion")
     mood = request.form.get("mood")
     weather = request.form.get("weather")
-    budget = request.form.get("budget")
+    budget_raw = request.form.get("budget")
+    budget_limit = get_budget_limit(budget_raw)
+    budget = f"INR {budget_limit}"
 
     # -------------------------
     # Detect Skin Tone
@@ -232,8 +244,6 @@ def analyze():
     if isinstance(result, str):
         result = {"tone": "Unknown", "rgb": (0, 0, 0), "note": result}
     skin_tone = result["tone"]
-
-    budget_limit = get_budget_limit(budget)
 
     # -------------------------
     # Strong & Safe AI Parser

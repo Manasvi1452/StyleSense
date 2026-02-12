@@ -4,71 +4,74 @@
     <title>Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-<div class="fashion-bg" aria-hidden="true">
-    <span class="float-item item-1"></span>
-    <span class="float-item item-2"></span>
-    <span class="float-item item-3"></span>
-    <span class="float-item item-4"></span>
-    <span class="float-item item-5"></span>
-</div>
+<body class="auth-page login-reveal">
 
-<div class="site-title">StyleSense+</div>
-<p class="site-tagline">Where your style meets smart fashion picks.</p>
+<div class="login-scroll-gate" aria-hidden="true"></div>
 
-<div class="clothesline-wrap" aria-hidden="true">
-    <div class="clothesline-wire"></div>
-    <div class="clothesline-track">
-        <div class="garment dress"><span class="cloth"></span></div>
-        <div class="garment shirt"><span class="cloth"></span></div>
-        <div class="garment skirt"><span class="cloth"></span></div>
-        <div class="garment tee"><span class="cloth"></span></div>
-        <div class="garment coat"><span class="cloth"></span></div>
-        <div class="garment shirt"><span class="cloth"></span></div>
-        <div class="garment dress"><span class="cloth"></span></div>
-        <div class="garment shirt"><span class="cloth"></span></div>
-        <div class="garment skirt"><span class="cloth"></span></div>
-        <div class="garment tee"><span class="cloth"></span></div>
-        <div class="garment coat"><span class="cloth"></span></div>
-        <div class="garment shirt"><span class="cloth"></span></div>
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">StyleSense+</div>
+        <nav class="topbar-nav">
+            <a href="/register">Create Account</a>
+        </nav>
     </div>
-</div>
+</header>
 
-<div class="login-shell">
-    <section class="card login-intro">
-        <h2>Your Personal Stylist</h2>
-        <p class="login-intro-text">
-            Sign in to generate outfit ideas, view product matches, and build your mood-based look in seconds.
-        </p>
-        <div class="login-points">
-            <div class="pill">Skin-tone aware styling</div>
-            <div class="pill">Ethnic + Western looks</div>
-            <div class="pill">Budget-friendly shopping links</div>
-        </div>
-    </section>
+<div class="auth-hero" aria-hidden="true"></div>
 
-    <div class="card login-card">
-        <h2>Welcome Back</h2>
-
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="flash-msg">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST">
-            <label for="email">Email</label>
-            <input id="email" type="email" name="email" placeholder="you@example.com" required>
-
-            <label for="password">Password</label>
-            <input id="password" type="password" name="password" placeholder="Enter password" required>
-
-            <button class="full-btn" type="submit">Login</button>
-        </form>
-        <p class="top-gap row-center"><a href="/register">Create Account</a></p>
+<main class="shell">
+    <div class="page-head">
+        <h1 class="page-title">Sign In</h1>
+        <p class="page-subtitle">AI-Powered Styling Workspace</p>
     </div>
-</div>
+
+    <div class="auth-grid">
+        <section class="card">
+            <h2>Professional Outfit Intelligence</h2>
+            <p class="muted">Access personalized style recommendations driven by skin tone, mood, occasion, and budget context.</p>
+            <div class="auth-points">
+                <div class="point">Dual styling output: Ethnic + Western</div>
+                <div class="point">Live shopping suggestions with budget alignment</div>
+                <div class="point">Voice-assisted preference capture</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Welcome Back</h2>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="flash-msg">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" placeholder="you@example.com" required>
+
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" placeholder="Enter password" required>
+
+                <button class="btn-full" type="submit">Login</button>
+            </form>
+            <p class="top-gap"><a href="/register">Need an account? Register</a></p>
+        </section>
+    </div>
+</main>
+
+<div class="enter-hint" id="enterHint">Scroll to enter</div>
+
+<script>
+function toggleLoginReveal() {
+    const threshold = 36;
+    const isActive = window.scrollY > threshold;
+    document.body.classList.toggle("reveal-active", isActive);
+}
+
+window.addEventListener("scroll", toggleLoginReveal, { passive: true });
+window.addEventListener("load", toggleLoginReveal);
+</script>
 </body>
 </html>
